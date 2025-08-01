@@ -1,19 +1,128 @@
-import { Link } from "react-router-dom";
+
+import React, { useState } from "react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import Swal from "sweetalert2";
 
 export const Navbar = () => {
+  const location = useLocation();
+  const navigate = useNavigate();
+  const token = localStorage.getItem("token");
+  const rawUser = localStorage.getItem("user");
+  const user = token && rawUser ? JSON.parse(rawUser) : null;
 
-	return (
-		<nav className="navbar navbar-light bg-light">
-			<div className="container">
-				<Link to="/">
-					<span className="navbar-brand mb-0 h1">React Boilerplate</span>
-				</Link>
-				<div className="ml-auto">
-					<Link to="/demo">
-						<button className="btn btn-primary">Check the Context in action</button>
-					</Link>
-				</div>
-			</div>
-		</nav>
-	);
+  const [isNavOpen, setIsNavOpen] = useState(false);
+  /* useEffect(() => {
+           if (user) {
+           console.log("Email del usuario:", user.email);
+           console.log("Nombre del usuario:", user.name);
+         }
+       }, [user]);*/
+
+  const handleLogout = () => {
+
+    //localStorage.removeItem("user"); //console.log("Token antes de borrar:", localStorage.getItem("token"));
+    //localStorage.removeItem("token");
+    //console.log("Token después de borrar:", localStorage.getItem("token"));
+    //elimino del localStorage tanto el token como el user    localStorage.clear();
+    navigate("/login");
+  };
+
+  const handleClose = () => {
+    Swal.fire({
+      title: "¡See you soon!",
+      icon: "info",
+      confirmButtonText: "Close",
+      confirmButtonColor: "#e4a2b0",
+    }).then(() => {
+      handleLogout();
+    });
+  };
+
+  return (
+    <nav className="navbar navbar-expand-lg" style={{
+      background: "linear-gradient(to bottom, #191823, #2f2531)",
+      zIndex: 10,
+    }}
+    >
+      <div className="container">
+       
+        <button
+          className="navbar-toggler"
+          type="button"
+          onClick={() => setIsNavOpen(!isNavOpen)}
+          style={{
+            border: "2px solid #e4a2b0",
+            borderRadius: "5px",
+            padding: "4px 10px",
+            backgroundColor: "transparent",
+          }}
+        >
+          <i className="fas fa-bars" style={{ color: "#e4a2b0", fontSize: "20px" }}></i>
+        </button>
+
+        <div className={`collapse navbar-collapse ${isNavOpen ? "show" : ""}`}>
+          <ul className="navbar-nav ms-auto align-items-center">
+            {!token ? (
+              <li className="nav-item">
+                <div className="d-flex flex-wrap gap-2 mt-2">
+                  {location.pathname === "/login" && (
+                    <Link to="/register" className="btn btn-outline-light">
+                      Sign Up
+                    </Link>
+                  )}
+                  {location.pathname === "/register" && (
+                    <Link to="/login" className="btn btn-outline-light">
+                      Log in
+                    </Link>
+                  )}
+                  {location.pathname === "/request-reset-password" && (
+                    <>
+                      <Link to="/login" className="btn btn-outline-light">
+                        Log in
+                      </Link>
+                      <Link to="/register" className="btn btn-outline-light">
+                        Sign Up
+                      </Link>
+                    </>
+                  )}
+                  <button className="btn btn-outline-light" onClick={handleClose}>
+                    Close
+                  </button>
+                </div>
+              </li>
+            ) : (
+              <>
+                {user && (
+                  <li className="nav-item text-white me-3">
+                    👤 {user.name}
+                  </li>
+                )}
+                <li className="nav-item d-flex flex-wrap gap-2 mt-2">
+                  <button className="btn btn-outline-light me-2" onClick={handleLogout}>
+                    Logout
+                  </button>
+
+                  <button
+                    className="btn btn-outline-light"
+                    onClick={() => {
+                      Swal.fire({
+                        title: "¡See you soon!",
+                        icon: "info",
+                        confirmButtonText: "Close",
+                        confirmButtonColor: "#e4a2b0",
+                      }).then(() => {
+                        handleLogout();
+                      });
+                    }}
+                  >
+                    Close
+                  </button>
+                </li>
+              </>
+            )}
+          </ul>
+        </div>
+      </div>
+    </nav>
+  );
 };
